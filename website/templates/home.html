@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1 align="center">Notes</h1>
+
+<ul class="list-group list-group-flush" id="notes">
+  {% for note in user.notes %}
+  <li class="list-group-item note color-{{ loop.index0 % 5 }}">
+    {{ note.data }}
+    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </li>
+  {% endfor %}
+</ul>
+
+<form method="POST" onsubmit="return addNote();">
+  <textarea name="note" id="note" class="form-control"></textarea>
+  <br />
+  <div align="center">
+    <button type="submit" class="btn btn-primary">Add Note</button>
+  </div>
+</form>
+
+<form>
+  <div class="form-group">
+    <input
+      type="text"
+      id="search-bar"
+      class="form-control"
+      placeholder="Search notes..."
+      oninput="filterNotes()"
+    />
+  </div>
+</form>
+
+<ul class="list-group list-group-flush" id="notes">
+  {% for note in user.notes %}
+  <li class="list-group-item note color-{{ loop.index0 % 5 }}">
+    <span class="note-text">{{ note.data }}</span>
+    <button type="button" class="close" onClick="deleteNote({{ note.id }})">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </li>
+  {% endfor %}
+</ul>
+
+
+
+<script>
+  let colorIndex = {{ user.notes|length % 5 }}; // Start cycling from the next color
+
+  function addNote() {
+    const noteInput = document.getElementById("note");
+    const noteText = noteInput.value.trim();
+
+    if (!noteText) {
+      alert("Please enter a note!");
+      return false;
+    }
+
+    // Create a new note element
+    const notesList = document.getElementById("notes");
+    const newNote = document.createElement("li");
+    newNote.classList.add("list-group-item", "note", `color-${colorIndex}`);
+    newNote.innerHTML = `
+      ${noteText}
+      <button type="button" class="close" onClick="deleteNote(null)">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    `;
+
+    // Append the new note to the list
+    notesList.appendChild(newNote);
+
+    // Update the color index to cycle through colors
+    colorIndex = (colorIndex + 1) % 5;
+
+    // Clear the input field
+    noteInput.value = "";
+
+    // Prevent form submission (remove this if server-side logic is needed)
+    return false;
+  }
+</script>
+
+<script>
+  function filterNotes() {
+    const query = document.getElementById("search-bar").value.toLowerCase();
+    const notes = document.querySelectorAll("#notes .list-group-item");
+
+    notes.forEach(note => {
+      const noteText = note.querySelector(".note-text").textContent.toLowerCase();
+      if (noteText.includes(query)) {
+        note.style.display = ""; // Show note
+      } else {
+        note.style.display = "none"; // Hide note
+      }
+    });
+  }
+</script>
+
+<style>
+  /* Define alternating pastel and transparent colors for notes */
+  .color-0 {
+    background-color: rgba(255, 182, 193, 0.8) !important; /* Light pink */
+    color: black;
+  }
+
+  .color-1 {
+    background-color: rgba(173, 216, 230, 0.8) !important; /* Light blue */
+    color: black;
+  }
+
+  .color-2 {
+    background-color: rgba(144, 238, 144, 0.8) !important; /* Light green */
+    color: black;
+  }
+
+  .color-3 {
+    background-color: rgba(255, 223, 186, 0.8) !important; /* Peach */
+    color: black;
+  }
+
+  .color-4 {
+    background-color: rgba(221, 160, 221, 0.8) !important; /* Lavender */
+    color: black;
+  }
+
+  /* Common styles for all notes */
+  .note {
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px;       /* Padding for better readability */
+    margin-bottom: 10px; /* Space between notes */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  }
+</style>
+
+{% endblock %}
+
